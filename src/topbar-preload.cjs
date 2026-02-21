@@ -1,6 +1,8 @@
 const { ipcRenderer } = require("electron");
 
 window.addEventListener("DOMContentLoaded", () => {
+  const windowName = "UniFi Desktop";
+
   const logoPath = `<path fill="#005ed9" d="M133.15,14.8h-7.69v7.69h7.69v-7.69Zm-26.9,53.84v-15.4h0s15.37,0,15.37,0v15.38h15.37c.26,14.25-.82,26.68-8.06,39.12-20.96,36.88-72.74,41.85-100.21,9.49h0c-6.41-7.45-11.02-16.51-13.18-26.18-1.1-5.25-1.58-11.92-1.58-17.55V15.76h30.75l.06,58.57c.15,7.58,1.52,15.37,6.05,21.31,13.04,17.66,40.64,16.06,51.33-3.18,3.84-6.42,4.19-16.61,4.09-23.82h0Zm3.84-42.31h11.53v11.53h15.38v15.38h-15.38v-15.37h-11.53v-11.53Z"/>`;
 
   const minimizeSvgContent = (color) => `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="0" y1="5" x2="10" y2="5" stroke="${color}" stroke-width="1"/></svg>`;
@@ -16,7 +18,10 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.style.background = isDark ? "rgb(40, 43, 47)" : "#f4f5f6";
     document.body.style.color = isDark ? "rgba(255, 255, 255, 0.85)" : "rgba(0, 0, 0, 0.85)";
 
-    title.style.color = isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
+    const titleElem = document.getElementById("title");
+    if (titleElem) {
+      titleElem.style.color = isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
+    }
 
     const iconColor = isDark ? "rgba(255, 255, 255, 0.55)" : "rgba(0, 0, 0, 0.55)";
     minBtn.innerHTML = minimizeSvgContent(iconColor);
@@ -24,28 +29,33 @@ window.addEventListener("DOMContentLoaded", () => {
     closeBtn.innerHTML = closeSvgContent(iconColor);
   };
 
-  document.body.style.cssText = "margin:0; padding:0; height:100vh; width:100vw; overflow:hidden; webkit-app-region:drag; font-family:'Inter',system-ui,sans-serif; user-select:none; display:flex; align-items:center; justify-content:space-between; padding-left:14px; box-sizing:border-box;";
+  console.log("[UniFi] Topbar Preload Initializing...");
+
+  document.documentElement.style.cssText = "margin:0; padding:0; height:40px; width:100vw; overflow:hidden; -webkit-app-region:drag; webkit-app-region:drag;";
+  document.body.style.cssText = "margin:0; padding:0; height:40px; width:100vw; overflow:hidden; -webkit-app-region:drag; webkit-app-region:drag; font-family:'Inter',system-ui,sans-serif; user-select:none; display:flex; align-items:center; justify-content:space-between; padding-left:14px; box-sizing:border-box;";
 
   const left = document.createElement("div");
-  left.style.cssText = "display:flex; align-items:center; gap:10px; pointer-events:none;";
+  left.style.cssText = "display:flex; align-items:center; gap:10px; height:100%; pointer-events:none;";
 
   const logo = document.createElement("div");
   logo.style.display = "flex";
+  logo.style.alignItems = "center";
   logo.innerHTML = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">${logoPath}</svg>`;
 
   const title = document.createElement("div");
-  title.innerText = "UniFi";
+  title.id = "title";
+  title.innerText = windowName;
   title.style.cssText = "font-weight:500; font-size:13px; letter-spacing:0.3px;";
 
   left.appendChild(logo);
   left.appendChild(title);
 
   const controls = document.createElement("div");
-  controls.style.cssText = "display:flex; height:100%; webkit-app-region:no-drag;";
+  controls.style.cssText = "display:flex; height:100%; -webkit-app-region:no-drag; webkit-app-region:no-drag; pointer-events:auto;";
 
   function createBtn(action, isClose = false) {
     const btn = document.createElement("div");
-    btn.style.cssText = "width:46px; height:100%; display:flex; align-items:center; justify-content:center; cursor:default; transition:background-color 0.15s ease;";
+    btn.style.cssText = "width:46px; height:100%; display:flex; align-items:center; justify-content:center; cursor:default; transition:background-color 0.15s ease; -webkit-app-region:no-drag; webkit-app-region:no-drag; pointer-events:auto;";
     btn.onmouseenter = () => {
       const hoverBg = isClose ? "#c42b1c" : (currentTheme === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)");
       btn.style.backgroundColor = hoverBg;
@@ -56,7 +66,10 @@ window.addEventListener("DOMContentLoaded", () => {
       const idleColor = currentTheme === "dark" ? "rgba(255, 255, 255, 0.55)" : "rgba(0, 0, 0, 0.55)";
       if (isClose) btn.querySelector("svg").style.color = idleColor;
     };
-    btn.onclick = action;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      action();
+    };
     return btn;
   }
 

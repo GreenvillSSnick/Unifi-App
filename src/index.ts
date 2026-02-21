@@ -11,6 +11,12 @@ let win: BrowserWindow | null = null;
 const CHROME_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36";
 
+const getPreloadPath = (name: string) => {
+  return app.isPackaged
+    ? path.join(app.getAppPath(), "src", name)
+    : path.join(__dirname, "..", "src", name);
+};
+
 async function createWindow() {
   const ses = session.fromPartition(PARTITION);
   ses.setUserAgent(CHROME_UA);
@@ -21,8 +27,10 @@ async function createWindow() {
     minWidth: 1000,
     minHeight: 700,
     frame: false,
+    title: "UniFi Desktop",
     backgroundColor: "#0f1720",
     webPreferences: {
+      preload: getPreloadPath("topbar-preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -32,22 +40,15 @@ async function createWindow() {
 
   const [winWidth, winHeight] = win.getSize();
 
-  const topBarView = new BrowserView({
-    webPreferences: {
-      preload: path.join(__dirname, "..", "src", "topbar-preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-    },
-  });
-
-  win.addBrowserView(topBarView);
-  topBarView.setBounds({ x: 0, y: 0, width: winWidth, height: TOPBAR_HEIGHT });
-  topBarView.webContents.loadURL("data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E");
+  // Load the physical topbar.html file
+  const topBarPath = app.isPackaged
+    ? path.join(app.getAppPath(), "src", "topbar.html")
+    : path.join(__dirname, "..", "src", "topbar.html");
+  win.loadFile(topBarPath);
 
   const uniFiView = new BrowserView({
     webPreferences: {
-      preload: path.join(__dirname, "..", "src", "unifi-preload.cjs"),
+      preload: getPreloadPath("unifi-preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -63,10 +64,8 @@ async function createWindow() {
     if (!win) return;
     const { width, height } = win.getContentBounds();
     if (isHtmlFullscreen) {
-      topBarView.setBounds({ x: 0, y: 0, width: 0, height: 0 });
       uniFiView.setBounds({ x: 0, y: 0, width, height });
     } else {
-      topBarView.setBounds({ x: 0, y: 0, width, height: TOPBAR_HEIGHT });
       uniFiView.setBounds({ x: 0, y: TOPBAR_HEIGHT, width, height: height - TOPBAR_HEIGHT });
     }
   }
@@ -90,8 +89,8 @@ async function createWindow() {
   await uniFiView.webContents.loadURL("https://unifi.ui.com");
 
   ipcMain.on("unifi:theme-change", (event, theme) => {
-    if (!topBarView.webContents.isDestroyed()) {
-      topBarView.webContents.send("theme-update", theme);
+    if (win && !win.webContents.isDestroyed()) {
+      win.webContents.send("theme-update", theme);
     }
   });
 

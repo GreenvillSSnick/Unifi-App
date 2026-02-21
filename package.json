@@ -1,7 +1,7 @@
 {
   "name": "unifi-desktop",
-  "version": "1.0.0",
-  "description": "UniFi Desktop Client",
+  "version": "1.0.1",
+  "description": "Powerful UniFi controller management from your desktop.",
   "license": "ISC",
   "author": "",
   "type": "module",
@@ -22,6 +22,8 @@
     "files": [
       "dist/**/*",
       "src/topbar-preload.cjs",
+      "src/unifi-preload.cjs",
+      "src/topbar.html",
       "src/assets/**/*"
     ],
     "extraMetadata": {
