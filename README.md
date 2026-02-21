@@ -10,6 +10,8 @@ Unofficial UniFi Desktop App for Windows, macOS, and Linux.
 
 ## Installation
 
+### Warning, you will need Windows Developer Mode enabled to build this setup. If you do not wish to enable this, please look in releases for a prebuilt installer binary.
+
 ```bash
 npm install
 npm run build
