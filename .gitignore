@@ -1,0 +1,7 @@
+node_modules/
+userData/
+dist/
+release/
+icons/
+build-log.txt
+package-lock.json

@@ -1,0 +1,50 @@
+{
+  "name": "unifi-desktop",
+  "version": "1.0.0",
+  "description": "UniFi Desktop Client",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsx ./node_modules/electron/cli.js ./src/index.ts",
+    "compile": "tsc",
+    "build-icons": "electron-icon-builder --input=./src/assets/unifi-1024.png --output=./ --flatten",
+    "build": "npm run build-icons && tsc && electron-builder --win",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.unofficial-unifi.desktop",
+    "productName": "UniFi Desktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "src/topbar-preload.cjs",
+      "src/assets/**/*"
+    ],
+    "extraMetadata": {
+      "main": "dist/index.js"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icons/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": null,
+      "uninstallerIcon": null
+    }
+  },
+  "devDependencies": {
+    "@types/electron": "^1.4.38",
+    "@types/node": "^25.3.0",
+    "electron": "^40.6.0",
+    "electron-builder": "^26.0.0",
+    "electron-icon-builder": "^2.0.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  }
+}
